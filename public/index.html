@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wrap issue example</title>
+    <script src="./assets/otel-browser.js"></script>
+    <script>
+        // Pass params
+        globalThis.instrument();
+    </script>
+</head>
+<body>
+    <div id="main">
+        <div>
+            <h1>Shimmer Browser Examples</h1>
+        </div>
+        <!-- Menu -->
+        <div id="menu">
+            <ul>
+                <li>
+                    <a href="/home">Home</a>
+                </li>
+                <li>
+                    <a href="/user-interaction">User Interaction</a>
+                </li>
+            </ul>
+        </div>
+
+        <div id="content">
+        </div>
+    </div>
+    
+
+    <script>
+        (function (window, document) {
+            const routes = Array.from(document.querySelectorAll('a')).map(l => l.href);
+            
+            function navigate(route) {
+                const target = document.getElementById('content');
+                history.pushState({}, "", route);
+                import(`./components/${route}.js`)
+                    .then((mod) => mod.Component(target));
+            }
+
+            function handleEvent(e) {
+                const {target} = e;
+                if (target.href) {
+                    e.preventDefault();
+                    const currentUrl = window.location;
+                    const targetUrl = new URL(target.href);
+                    if (currentUrl.pathname !== targetUrl.pathname) {
+                        navigate(targetUrl.pathname.slice(1));
+                    }
+                }
+            }
+            document.addEventListener('click', handleEvent);
+
+            // 1st navigation, go to home if not detected
+            if (routes.includes(location.pathname)) {
+                navigate(location.pathname);
+            } else if (!location.pathname) {
+                navigate('home');
+            } else {
+                location.pathname !== '/home';
+                navigate('home');
+            }
+
+        }(this, this.document));
+    </script>
+
+</body>
+</html>
